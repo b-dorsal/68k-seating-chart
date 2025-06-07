@@ -50,3 +50,10 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+SeatingChart.APPL
+.gitignore
+SeatingChart.code.bin
+SeatingChart.code.bin.gdb
+SeatingChart.bin
+SeatingChart.dsk
+.gitignore
