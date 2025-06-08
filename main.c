@@ -33,6 +33,7 @@ typedef struct
 
 // Function prototypes
 unsigned char *c2pstrb(const char *cstr);
+void drawInstructions(WindowPtr winPtr);
 void drawAlphabet(WindowPtr winPtr, char selectedLetter);
 void drawNames(WindowPtr winPtr, NameEntry names[], int nameCount, int rowsPerColumn, int columnsPerPage);
 int filterNames(NameEntry allNames[], int totalNames, NameEntry filteredNames[], char letter);
@@ -109,6 +110,7 @@ void main()
         {
             EraseRect(&winPtr->portRect);
             drawAlphabet(winPtr, selectedLetter);
+            drawInstructions(winPtr);
 
             if (selectedLetter != '\0')
             {
@@ -138,7 +140,7 @@ void main()
                 GlobalToLocal(&mousePoint);
 
                 // Handle alphabet clicks
-                if (mousePoint.v >= 30 && mousePoint.v < 40)
+                if (mousePoint.v >= 130 && mousePoint.v < 140)
                 {
                     int totalWidth = subsetCount * 20;
                     int startX = (SCREEN_WIDTH - totalWidth) / 2;
@@ -154,11 +156,11 @@ void main()
                     }
                 }
                 // Handle name clicks
-                else if (mousePoint.v >= 44)
+                else if (mousePoint.v >= 160)
                 {
                     int rowsPerColumn = 8;
                     int column = (mousePoint.h - 20) / COLUMN_WIDTH;
-                    int row = (mousePoint.v - 40) / LIST_ITEM_HEIGHT;
+                    int row = (mousePoint.v - 160) / LIST_ITEM_HEIGHT;
                     int nameIndex = column * rowsPerColumn + row;
 
                     if (nameIndex >= 0 && nameIndex < (selectedLetter != '\0' ? filteredCount : MAX_NAMES))
@@ -176,6 +178,32 @@ void main()
 // Helper functions (organized by functionality)
 
 // Draw the alphabet at the top of the screen
+void drawInstructions(WindowPtr winPtr)
+{
+    SetPort(winPtr);
+    
+    short customFontId;
+    GetFNum("\pVenice", &customFontId);
+    if (customFontId != 0) {
+        TextFont(customFontId); // Use Los Angeles font
+    } else {
+        TextFont(3); // Fallback to another font (e.g., Geneva)
+    }
+
+    TextFace(bold);
+    TextSize(30);
+    drawCenteredString(winPtr, "Welcome", SCREEN_WIDTH, 50);
+
+    TextFace(normal);
+    TextSize(15);
+    drawCenteredString(winPtr, "to our wedding!", SCREEN_WIDTH, 72);
+
+    TextSize(12);
+    drawCenteredString(winPtr, "Filter by your last name to print your table number:", SCREEN_WIDTH, 120);
+}
+
+
+// Draw the alphabet at the top of the screen
 void drawAlphabet(WindowPtr winPtr, char selectedLetter)
 {
     SetPort(winPtr);
@@ -186,17 +214,27 @@ void drawAlphabet(WindowPtr winPtr, char selectedLetter)
 
     for (int i = 0; i < subsetCount; i++)
     {
+        TextSize(12);
         int x = startX + i * 20;
-        int y = 40;
+        int y = 140;
         MoveTo(x, y);
         char letter[2] = {subsetLetters[i], '\0'};
         if (selectedLetter == letter[0])
         {
+            TextSize(14);
             TextFace(bold);
         }
         DrawString(c2pstrb(letter));
         TextFace(normal);
     }
+
+    // Draw a line below the alphabet
+    int lineStartX = startX - 20 ;
+    int lineEndX = startX + totalWidth + 15;
+    int lineY = 150; // Position the line slightly below the alphabet
+    MoveTo(lineStartX, lineY);
+    LineTo(lineEndX, lineY);
+
 }
 
 // Draw the names in columns
@@ -206,7 +244,7 @@ void drawNames(WindowPtr winPtr, NameEntry names[], int nameCount, int rowsPerCo
     for (int col = 0; col < columnsPerPage; col++)
     {
         int x = 20 + col * COLUMN_WIDTH;
-        int y = 60;
+        int y = 170;
         for (int row = 0; row < rowsPerColumn && nameIndex < nameCount; row++)
         {
             MoveTo(x, y);
